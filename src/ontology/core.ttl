@@ -1,0 +1,170 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix onto: <http://ontoseed.org/core#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+
+# OntoSeed Core Ontology - Universal Rules
+# Four fundamental patterns: Identity, Containment, Cause, Reflection
+
+onto:OntoSeed a owl:Ontology ;
+    rdfs:label "OntoSeed Core Ontology" ;
+    rdfs:comment "Scale-independent seed ontology with four universal rules" ;
+    owl:versionInfo "1.0.0" .
+
+# ========================================
+# RULE 1: IDENTITY
+# Every entity must have a unique identifier and self-reference
+# ========================================
+
+onto:Entity a owl:Class ;
+    rdfs:label "Entity" ;
+    rdfs:comment "Base class for all entities in the ontology" .
+
+onto:hasIdentity a owl:ObjectProperty ;
+    rdfs:label "has identity" ;
+    rdfs:comment "Relates an entity to its unique identifier" ;
+    rdfs:domain onto:Entity ;
+    rdfs:range onto:Identity .
+
+onto:Identity a owl:Class ;
+    rdfs:label "Identity" ;
+    rdfs:comment "Unique identifier for an entity" .
+
+onto:identityValue a owl:DatatypeProperty ;
+    rdfs:label "identity value" ;
+    rdfs:comment "The actual identifier value" ;
+    rdfs:domain onto:Identity ;
+    rdfs:range xsd:string .
+
+# ========================================
+# RULE 2: CONTAINMENT
+# Every entity can contain and be contained by other entities
+# ========================================
+
+onto:contains a owl:ObjectProperty ;
+    rdfs:label "contains" ;
+    rdfs:comment "One entity contains another" ;
+    rdfs:domain onto:Entity ;
+    rdfs:range onto:Entity .
+
+onto:containedBy a owl:ObjectProperty ;
+    rdfs:label "contained by" ;
+    rdfs:comment "One entity is contained by another" ;
+    rdfs:domain onto:Entity ;
+    rdfs:range onto:Entity ;
+    owl:inverseOf onto:contains .
+
+onto:Container a owl:Class ;
+    rdfs:label "Container" ;
+    rdfs:comment "An entity that can contain other entities" ;
+    rdfs:subClassOf onto:Entity .
+
+onto:Contained a owl:Class ;
+    rdfs:label "Contained" ;
+    rdfs:comment "An entity that can be contained by other entities" ;
+    rdfs:subClassOf onto:Entity .
+
+# ========================================
+# RULE 3: CAUSE
+# Every entity can cause and be caused by other entities
+# ========================================
+
+onto:causes a owl:ObjectProperty ;
+    rdfs:label "causes" ;
+    rdfs:comment "One entity causes another" ;
+    rdfs:domain onto:Entity ;
+    rdfs:range onto:Entity .
+
+onto:causedBy a owl:ObjectProperty ;
+    rdfs:label "caused by" ;
+    rdfs:comment "One entity is caused by another" ;
+    rdfs:domain onto:Entity ;
+    rdfs:range onto:Entity ;
+    owl:inverseOf onto:causes .
+
+onto:Cause a owl:Class ;
+    rdfs:label "Cause" ;
+    rdfs:comment "An entity that can cause other entities" ;
+    rdfs:subClassOf onto:Entity .
+
+onto:Effect a owl:Class ;
+    rdfs:label "Effect" ;
+    rdfs:comment "An entity that can be caused by other entities" ;
+    rdfs:subClassOf onto:Entity .
+
+onto:CausalChain a owl:Class ;
+    rdfs:label "Causal Chain" ;
+    rdfs:comment "A sequence of cause-effect relationships" ;
+    rdfs:subClassOf onto:Entity .
+
+onto:hasProvenance a owl:ObjectProperty ;
+    rdfs:label "has provenance" ;
+    rdfs:comment "Links an entity to its causal provenance" ;
+    rdfs:domain onto:Entity ;
+    rdfs:range onto:CausalChain .
+
+# ========================================
+# RULE 4: REFLECTION
+# Every entity can reflect and be reflected by other entities
+# ========================================
+
+onto:reflects a owl:ObjectProperty ;
+    rdfs:label "reflects" ;
+    rdfs:comment "One entity reflects another" ;
+    rdfs:domain onto:Entity ;
+    rdfs:range onto:Entity .
+
+onto:reflectedBy a owl:ObjectProperty ;
+    rdfs:label "reflected by" ;
+    rdfs:comment "One entity is reflected by another" ;
+    rdfs:domain onto:Entity ;
+    rdfs:range onto:Entity ;
+    owl:inverseOf onto:reflects .
+
+onto:Reflection a owl:Class ;
+    rdfs:label "Reflection" ;
+    rdfs:comment "A reflection of an entity" ;
+    rdfs:subClassOf onto:Entity .
+
+onto:Mirror a owl:Class ;
+    rdfs:label "Mirror" ;
+    rdfs:comment "An entity that can create reflections" ;
+    rdfs:subClassOf onto:Entity .
+
+onto:hasReflection a owl:ObjectProperty ;
+    rdfs:label "has reflection" ;
+    rdfs:comment "Links an entity to its reflection" ;
+    rdfs:domain onto:Entity ;
+    rdfs:range onto:Reflection .
+
+# ========================================
+# META-PROPERTIES
+# Properties that govern the universal rules
+# ========================================
+
+onto:isScaleIndependent a owl:DatatypeProperty ;
+    rdfs:label "is scale independent" ;
+    rdfs:comment "Indicates if a property applies at all scales" ;
+    rdfs:domain rdf:Property ;
+    rdfs:range xsd:boolean .
+
+onto:universalRule a owl:DatatypeProperty ;
+    rdfs:label "universal rule" ;
+    rdfs:comment "Identifies which universal rule this property implements" ;
+    rdfs:domain rdf:Property ;
+    rdfs:range xsd:string .
+
+# Apply scale independence to all core properties
+onto:hasIdentity onto:isScaleIndependent true ;
+    onto:universalRule "identity" .
+
+onto:contains onto:isScaleIndependent true ;
+    onto:universalRule "containment" .
+
+onto:causes onto:isScaleIndependent true ;
+    onto:universalRule "cause" .
+
+onto:reflects onto:isScaleIndependent true ;
+    onto:universalRule "reflection" .

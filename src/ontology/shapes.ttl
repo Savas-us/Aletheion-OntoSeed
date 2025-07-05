@@ -1,0 +1,258 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix onto: <http://ontoseed.org/core#> .
+@prefix shapes: <http://ontoseed.org/shapes#> .
+
+# SHACL Shapes for OntoSeed Universal Rules Validation
+# Ensures every new concept follows the four universal rules
+
+shapes:OntoSeedShapes a owl:Ontology ;
+    rdfs:label "OntoSeed SHACL Shapes" ;
+    rdfs:comment "Validation shapes for OntoSeed universal rules" ;
+    owl:versionInfo "1.0.0" .
+
+# ========================================
+# RULE 1 VALIDATION: IDENTITY
+# Every entity must have exactly one identity
+# ========================================
+
+shapes:EntityShape a sh:NodeShape ;
+    sh:targetClass onto:Entity ;
+    rdfs:label "Entity Shape" ;
+    rdfs:comment "Validates that every entity follows universal rules" ;
+    
+    # Identity Rule: Every entity must have exactly one identity
+    sh:property [
+        sh:path onto:hasIdentity ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:class onto:Identity ;
+        sh:name "Identity requirement" ;
+        sh:description "Every entity must have exactly one identity" ;
+        sh:severity sh:Violation
+    ] .
+
+shapes:IdentityShape a sh:NodeShape ;
+    sh:targetClass onto:Identity ;
+    rdfs:label "Identity Shape" ;
+    rdfs:comment "Validates identity structure" ;
+    
+    # Identity must have a unique value
+    sh:property [
+        sh:path onto:identityValue ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:string ;
+        sh:minLength 1 ;
+        sh:name "Identity value requirement" ;
+        sh:description "Identity must have a non-empty string value" ;
+        sh:severity sh:Violation
+    ] .
+
+# ========================================
+# RULE 2 VALIDATION: CONTAINMENT
+# Containment relationships must be consistent
+# ========================================
+
+shapes:ContainmentShape a sh:NodeShape ;
+    sh:targetClass onto:Entity ;
+    rdfs:label "Containment Shape" ;
+    rdfs:comment "Validates containment relationships" ;
+    
+    # If A contains B, then B is contained by A
+    sh:sparql [
+        sh:message "Containment relationship must be symmetric" ;
+        sh:prefixes [
+            sh:declare [
+                sh:prefix "onto" ;
+                sh:namespace "http://ontoseed.org/core#"
+            ]
+        ] ;
+        sh:select """
+            SELECT $this ?contained
+            WHERE {
+                $this onto:contains ?contained .
+                FILTER NOT EXISTS { ?contained onto:containedBy $this }
+            }
+        """ ;
+        sh:severity sh:Warning
+    ] ;
+    
+    # No self-containment
+    sh:sparql [
+        sh:message "Entity cannot contain itself" ;
+        sh:prefixes [
+            sh:declare [
+                sh:prefix "onto" ;
+                sh:namespace "http://ontoseed.org/core#"
+            ]
+        ] ;
+        sh:select """
+            SELECT $this
+            WHERE {
+                $this onto:contains $this .
+            }
+        """ ;
+        sh:severity sh:Violation
+    ] .
+
+# ========================================
+# RULE 3 VALIDATION: CAUSE
+# Causal relationships must maintain provenance
+# ========================================
+
+shapes:CausalShape a sh:NodeShape ;
+    sh:targetClass onto:Entity ;
+    rdfs:label "Causal Shape" ;
+    rdfs:comment "Validates causal relationships" ;
+    
+    # If A causes B, then B is caused by A
+    sh:sparql [
+        sh:message "Causal relationship must be symmetric" ;
+        sh:prefixes [
+            sh:declare [
+                sh:prefix "onto" ;
+                sh:namespace "http://ontoseed.org/core#"
+            ]
+        ] ;
+        sh:select """
+            SELECT $this ?effect
+            WHERE {
+                $this onto:causes ?effect .
+                FILTER NOT EXISTS { ?effect onto:causedBy $this }
+            }
+        """ ;
+        sh:severity sh:Warning
+    ] ;
+    
+    # No self-causation
+    sh:sparql [
+        sh:message "Entity cannot cause itself directly" ;
+        sh:prefixes [
+            sh:declare [
+                sh:prefix "onto" ;
+                sh:namespace "http://ontoseed.org/core#"
+            ]
+        ] ;
+        sh:select """
+            SELECT $this
+            WHERE {
+                $this onto:causes $this .
+            }
+        """ ;
+        sh:severity sh:Violation
+    ] .
+
+shapes:ProvenanceShape a sh:NodeShape ;
+    sh:targetClass onto:Effect ;
+    rdfs:label "Provenance Shape" ;
+    rdfs:comment "Validates that effects have provenance" ;
+    
+    # Effects should have provenance
+    sh:property [
+        sh:path onto:hasProvenance ;
+        sh:minCount 0 ;
+        sh:class onto:CausalChain ;
+        sh:name "Provenance tracking" ;
+        sh:description "Effects should track their causal provenance" ;
+        sh:severity sh:Info
+    ] .
+
+# ========================================
+# RULE 4 VALIDATION: REFLECTION
+# Reflection relationships must be consistent
+# ========================================
+
+shapes:ReflectionShape a sh:NodeShape ;
+    sh:targetClass onto:Entity ;
+    rdfs:label "Reflection Shape" ;
+    rdfs:comment "Validates reflection relationships" ;
+    
+    # If A reflects B, then B is reflected by A
+    sh:sparql [
+        sh:message "Reflection relationship must be symmetric" ;
+        sh:prefixes [
+            sh:declare [
+                sh:prefix "onto" ;
+                sh:namespace "http://ontoseed.org/core#"
+            ]
+        ] ;
+        sh:select """
+            SELECT $this ?reflected
+            WHERE {
+                $this onto:reflects ?reflected .
+                FILTER NOT EXISTS { ?reflected onto:reflectedBy $this }
+            }
+        """ ;
+        sh:severity sh:Warning
+    ] .
+
+shapes:MirrorShape a sh:NodeShape ;
+    sh:targetClass onto:Mirror ;
+    rdfs:label "Mirror Shape" ;
+    rdfs:comment "Validates mirror entities" ;
+    
+    # Mirrors should create reflections
+    sh:property [
+        sh:path onto:reflects ;
+        sh:minCount 1 ;
+        sh:class onto:Entity ;
+        sh:name "Mirror reflection requirement" ;
+        sh:description "Mirrors must reflect at least one entity" ;
+        sh:severity sh:Warning
+    ] .
+
+# ========================================
+# UNIVERSAL VALIDATION
+# Meta-validation for all universal rules
+# ========================================
+
+shapes:UniversalRuleShape a sh:NodeShape ;
+    sh:targetClass rdf:Property ;
+    rdfs:label "Universal Rule Shape" ;
+    rdfs:comment "Validates universal rule properties" ;
+    
+    # Properties implementing universal rules should be scale-independent
+    sh:sparql [
+        sh:message "Universal rule properties should be scale-independent" ;
+        sh:prefixes [
+            sh:declare [
+                sh:prefix "onto" ;
+                sh:namespace "http://ontoseed.org/core#"
+            ]
+        ] ;
+        sh:select """
+            SELECT $this
+            WHERE {
+                $this onto:universalRule ?rule .
+                FILTER NOT EXISTS { $this onto:isScaleIndependent true }
+            }
+        """ ;
+        sh:severity sh:Warning
+    ] .
+
+# ========================================
+# CONCEPT VALIDATION
+# Validation for new concepts added to the ontology
+# ========================================
+
+shapes:NewConceptShape a sh:NodeShape ;
+    sh:targetClass onto:Entity ;
+    rdfs:label "New Concept Shape" ;
+    rdfs:comment "Validates that new concepts follow OntoSeed principles" ;
+    
+    # New concepts must implement at least one universal rule
+    sh:or (
+        [sh:property [sh:path onto:hasIdentity ; sh:minCount 1]]
+        [sh:property [sh:path onto:contains ; sh:minCount 1]]
+        [sh:property [sh:path onto:containedBy ; sh:minCount 1]]
+        [sh:property [sh:path onto:causes ; sh:minCount 1]]
+        [sh:property [sh:path onto:causedBy ; sh:minCount 1]]
+        [sh:property [sh:path onto:reflects ; sh:minCount 1]]
+        [sh:property [sh:path onto:reflectedBy ; sh:minCount 1]]
+    ) ;
+    sh:message "New concepts must implement at least one universal rule" ;
+    sh:severity sh:Info .
