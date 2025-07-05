@@ -54,19 +54,34 @@ jobs:
         # Check TTL syntax
         riot --validate src/ontology/core.ttl
         riot --validate src/ontology/shapes.ttl
+        riot --validate src/ontology/seed_concepts.ttl
 
     - name: Run SHACL validation
       run: |
-        # Validate the core ontology against its own shapes
-        pyshacl -s src/ontology/shapes.ttl -d src/ontology/core.ttl -f turtle -o validation-report.ttl
+        # Validate the seed concepts against the shapes
+        echo "Running SHACL validation..."
         
-        # Check if validation passed
-        if [ -s validation-report.ttl ]; then
-          echo "SHACL validation found issues:"
-          cat validation-report.ttl
-          exit 1
+        # Combine core ontology and seed concepts for validation
+        cat src/ontology/core.ttl src/ontology/seed_concepts.ttl > combined-data.ttl
+        
+        # Run pyshacl and capture exit code
+        if pyshacl -s src/ontology/shapes.ttl -d combined-data.ttl -f turtle -o validation-report.ttl; then
+          echo "✓ SHACL validation passed (conforms=true)"
+          
+          # Check if there are any validation results to show
+          if [ -s validation-report.ttl ]; then
+            echo "Validation report:"
+            cat validation-report.ttl
+          else
+            echo "No validation issues found"
+          fi
         else
-          echo "✓ SHACL validation passed"
+          echo "✗ SHACL validation failed (conforms=false)"
+          if [ -s validation-report.ttl ]; then
+            echo "Validation report:"
+            cat validation-report.ttl
+          fi
+          exit 1
         fi
 
     - name: Test ontology loading
@@ -169,6 +184,7 @@ jobs:
         
         echo "- Core ontology triples: $(riot --count src/ontology/core.ttl)" >> validation-summary.md
         echo "- SHACL shapes triples: $(riot --count src/ontology/shapes.ttl)" >> validation-summary.md
+        echo "- Seed concepts triples: $(riot --count src/ontology/seed_concepts.ttl)" >> validation-summary.md
         echo "" >> validation-summary.md
         echo "## Validation Results" >> validation-summary.md
         echo "- ✓ Syntax validation passed" >> validation-summary.md

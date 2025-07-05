@@ -1,0 +1,183 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix onto: <http://ontoseed.org/core#> .
+@prefix ex: <http://example.org/> .
+
+# OntoSeed Seed Concepts - Sample instances for validation
+# Demonstrates the four universal rules in practice
+
+ex:SeedConcepts a owl:Ontology ;
+    rdfs:label "OntoSeed Seed Concepts" ;
+    rdfs:comment "Sample instances demonstrating universal rules" ;
+    owl:versionInfo "1.0.0" .
+
+# ========================================
+# CONCEPT CLASSES
+# Define specific entity types for testing
+# ========================================
+
+ex:Entity a owl:Class ;
+    rdfs:subClassOf onto:Entity ;
+    rdfs:label "Example Entity" ;
+    rdfs:comment "Base class for example entities" .
+
+ex:Cell a owl:Class ;
+    rdfs:subClassOf ex:Entity ;
+    rdfs:label "Cell" ;
+    rdfs:comment "A biological cell entity" .
+
+ex:Human a owl:Class ;
+    rdfs:subClassOf ex:Entity ;
+    rdfs:label "Human" ;
+    rdfs:comment "A human entity" .
+
+ex:Company a owl:Class ;
+    rdfs:subClassOf ex:Entity ;
+    rdfs:label "Company" ;
+    rdfs:comment "A company/organization entity" .
+
+# ========================================
+# SAMPLE INSTANCES WITH IDENTITIES
+# Demonstrating Rule 1: Identity
+# ========================================
+
+# Cell1 - A biological cell
+ex:Cell1 a ex:Cell ;
+    rdfs:label "Cell1" ;
+    rdfs:comment "A sample biological cell" ;
+    onto:hasIdentity ex:Cell1_Identity .
+
+ex:Cell1_Identity a onto:Identity ;
+    onto:identityValue "cell-001-mitochondria" .
+
+# Human1 - A human being  
+ex:Human1 a ex:Human ;
+    rdfs:label "Human1" ;
+    rdfs:comment "A sample human entity" ;
+    onto:hasIdentity ex:Human1_Identity .
+
+ex:Human1_Identity a onto:Identity ;
+    onto:identityValue "human-001-alice" .
+
+# Company1 - An organization
+ex:Company1 a ex:Company ;
+    rdfs:label "Company1" ;
+    rdfs:comment "A sample company entity" ;
+    onto:hasIdentity ex:Company1_Identity .
+
+ex:Company1_Identity a onto:Identity ;
+    onto:identityValue "company-001-acme-corp" .
+
+# ========================================
+# CONTAINMENT RELATIONSHIPS
+# Demonstrating Rule 2: Containment
+# ========================================
+
+# Human1 contains Cell1 (cells are part of humans)
+ex:Human1 onto:contains ex:Cell1 .
+ex:Cell1 onto:containedBy ex:Human1 .
+
+# Company1 contains Human1 (humans work for companies)
+ex:Company1 onto:contains ex:Human1 .
+ex:Human1 onto:containedBy ex:Company1 .
+
+# Additional containment examples
+ex:Cell2 a ex:Cell ;
+    rdfs:label "Cell2" ;
+    rdfs:comment "Another biological cell" ;
+    onto:hasIdentity ex:Cell2_Identity .
+
+ex:Cell2_Identity a onto:Identity ;
+    onto:identityValue "cell-002-nucleus" .
+
+ex:Human1 onto:contains ex:Cell2 .
+ex:Cell2 onto:containedBy ex:Human1 .
+
+# ========================================
+# CAUSAL RELATIONSHIPS  
+# Demonstrating Rule 3: Cause
+# ========================================
+
+# Cell1 causes Cell2 (cell division/creation)
+ex:Cell1 onto:causes ex:Cell2 .
+ex:Cell2 onto:causedBy ex:Cell1 .
+
+# Human1 causes Company1 (humans create companies)
+ex:Human1 onto:causes ex:Company1 .
+ex:Company1 onto:causedBy ex:Human1 .
+
+# Causal chain for provenance
+ex:CellDivisionChain a onto:CausalChain ;
+    rdfs:label "Cell Division Chain" ;
+    rdfs:comment "Causal chain showing cell division process" .
+
+ex:Cell2 onto:hasProvenance ex:CellDivisionChain .
+
+# ========================================
+# REFLECTION RELATIONSHIPS
+# Demonstrating Rule 4: Reflection  
+# ========================================
+
+# Create reflection entities
+ex:Cell1_Reflection a onto:Reflection ;
+    rdfs:label "Cell1 Reflection" ;
+    rdfs:comment "Reflection of Cell1" .
+
+ex:Human1_Mirror a onto:Mirror ;
+    rdfs:label "Human1 Mirror" ;
+    rdfs:comment "Mirror entity for Human1" .
+
+# Reflection relationships
+ex:Cell1 onto:reflects ex:Cell1_Reflection .
+ex:Cell1_Reflection onto:reflectedBy ex:Cell1 .
+
+ex:Human1_Mirror onto:reflects ex:Human1 .
+ex:Human1 onto:reflectedBy ex:Human1_Mirror .
+
+ex:Human1 onto:hasReflection ex:Human1_Mirror .
+
+# ========================================
+# ADDITIONAL EXAMPLES FOR VALIDATION
+# More complex relationship patterns
+# ========================================
+
+# Department as intermediate containment
+ex:Department a owl:Class ;
+    rdfs:subClassOf ex:Entity ;
+    rdfs:label "Department" ;
+    rdfs:comment "A department within a company" .
+
+ex:Dept1 a ex:Department ;
+    rdfs:label "Engineering Department" ;
+    rdfs:comment "The engineering department" ;
+    onto:hasIdentity ex:Dept1_Identity .
+
+ex:Dept1_Identity a onto:Identity ;
+    onto:identityValue "dept-001-engineering" .
+
+# Multi-level containment
+ex:Company1 onto:contains ex:Dept1 .
+ex:Dept1 onto:containedBy ex:Company1 .
+ex:Dept1 onto:contains ex:Human1 .
+
+# Additional human for more complex relationships
+ex:Human2 a ex:Human ;
+    rdfs:label "Human2" ;
+    rdfs:comment "Another human entity" ;
+    onto:hasIdentity ex:Human2_Identity .
+
+ex:Human2_Identity a onto:Identity ;
+    onto:identityValue "human-002-bob" .
+
+ex:Dept1 onto:contains ex:Human2 .
+ex:Human2 onto:containedBy ex:Dept1 .
+
+# Peer causality
+ex:Human1 onto:causes ex:Human2 .
+ex:Human2 onto:causedBy ex:Human1 .
+
+# Cross-reflection
+ex:Human1 onto:reflects ex:Human2 .
+ex:Human2 onto:reflectedBy ex:Human1 .

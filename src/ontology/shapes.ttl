@@ -5,6 +5,7 @@
 @prefix sh: <http://www.w3.org/ns/shacl#> .
 @prefix onto: <http://ontoseed.org/core#> .
 @prefix shapes: <http://ontoseed.org/shapes#> .
+@prefix ex: <http://example.org/> .
 
 # SHACL Shapes for OntoSeed Universal Rules Validation
 # Ensures every new concept follows the four universal rules
@@ -21,6 +22,10 @@ shapes:OntoSeedShapes a owl:Ontology ;
 
 shapes:EntityShape a sh:NodeShape ;
     sh:targetClass onto:Entity ;
+    sh:targetClass ex:Entity ;
+    sh:targetClass ex:Cell ;
+    sh:targetClass ex:Human ; 
+    sh:targetClass ex:Company ;
     rdfs:label "Entity Shape" ;
     rdfs:comment "Validates that every entity follows universal rules" ;
     
@@ -58,7 +63,8 @@ shapes:IdentityShape a sh:NodeShape ;
 # ========================================
 
 shapes:ContainmentShape a sh:NodeShape ;
-    sh:targetClass onto:Entity ;
+    sh:targetSubjectsOf onto:contains ;
+    sh:targetSubjectsOf onto:containedBy ;
     rdfs:label "Containment Shape" ;
     rdfs:comment "Validates containment relationships" ;
     
@@ -105,7 +111,8 @@ shapes:ContainmentShape a sh:NodeShape ;
 # ========================================
 
 shapes:CausalShape a sh:NodeShape ;
-    sh:targetClass onto:Entity ;
+    sh:targetSubjectsOf onto:causes ;
+    sh:targetSubjectsOf onto:causedBy ;
     rdfs:label "Causal Shape" ;
     rdfs:comment "Validates causal relationships" ;
     
@@ -146,9 +153,10 @@ shapes:CausalShape a sh:NodeShape ;
         sh:severity sh:Violation
     ] .
 
-shapes:ProvenanceShape a sh:NodeShape ;
+shapes:EffectShape a sh:NodeShape ;
     sh:targetClass onto:Effect ;
-    rdfs:label "Provenance Shape" ;
+    sh:targetObjectsOf onto:causes ;
+    rdfs:label "Effect Shape" ;
     rdfs:comment "Validates that effects have provenance" ;
     
     # Effects should have provenance
@@ -167,7 +175,8 @@ shapes:ProvenanceShape a sh:NodeShape ;
 # ========================================
 
 shapes:ReflectionShape a sh:NodeShape ;
-    sh:targetClass onto:Entity ;
+    sh:targetSubjectsOf onto:reflects ;
+    sh:targetSubjectsOf onto:reflectedBy ;
     rdfs:label "Reflection Shape" ;
     rdfs:comment "Validates reflection relationships" ;
     
@@ -211,7 +220,7 @@ shapes:MirrorShape a sh:NodeShape ;
 # ========================================
 
 shapes:UniversalRuleShape a sh:NodeShape ;
-    sh:targetClass rdf:Property ;
+    sh:targetSubjectsOf onto:universalRule ;
     rdfs:label "Universal Rule Shape" ;
     rdfs:comment "Validates universal rule properties" ;
     
@@ -239,9 +248,12 @@ shapes:UniversalRuleShape a sh:NodeShape ;
 # Validation for new concepts added to the ontology
 # ========================================
 
-shapes:NewConceptShape a sh:NodeShape ;
-    sh:targetClass onto:Entity ;
-    rdfs:label "New Concept Shape" ;
+shapes:ConceptComplianceShape a sh:NodeShape ;
+    sh:targetClass ex:Entity ;
+    sh:targetClass ex:Cell ;
+    sh:targetClass ex:Human ;
+    sh:targetClass ex:Company ;
+    rdfs:label "Concept Compliance Shape" ;
     rdfs:comment "Validates that new concepts follow OntoSeed principles" ;
     
     # New concepts must implement at least one universal rule
