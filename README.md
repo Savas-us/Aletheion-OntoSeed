@@ -1,36 +1,171 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# OntoSeed
 
-## Getting Started
+Build a scale-independent "seed ontology" with four universal rules: identity, containment, cause, reflection. Provide SHACL validation so every new concept is auto-checked.
 
-First, run the development server:
+## Technology Stack
+
+- **Framework**: Next.js 15 with App Router
+- **Language**: TypeScript  
+- **Styling**: Tailwind CSS
+- **Ontology**: RDF/OWL with SHACL validation
+- **Package Manager**: npm
+
+## Quick Start
 
 ```bash
+# Install dependencies
+npm install
+
+# Start development server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+
+# Build for production
+npm run build
+
+# Run linting
+npm run lint
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Four Universal Rules
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. **Identity**: Every entity must have a unique identifier and self-reference
+2. **Containment**: Every entity can contain and be contained by other entities
+3. **Cause**: Every entity can cause and be caused by other entities (with provenance)  
+4. **Reflection**: Every entity can reflect and be reflected by other entities
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Playground
 
-## Learn More
+### Getting Started
 
-To learn more about Next.js, take a look at the following resources:
+1. Start the development server:
+   ```bash
+   npm run dev
+   ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+2. Visit the playground:
+   ```
+   http://localhost:3000/playground
+   ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+3. Try validating concepts against OntoSeed rules!
 
-## Deploy on Vercel
+### Using the Playground
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+The playground provides an interactive interface to validate RDF Turtle concepts against OntoSeed's universal rules.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+**Basic Usage:**
+1. Enter or paste Turtle RDF content in the text area
+2. Click "Validate Against OntoSeed Rules" 
+3. View results with validation status and detailed reports
+
+**Example Concepts:**
+
+Valid concept (follows identity rule):
+```turtle
+@prefix onto: <http://ontoseed.org/core#> .
+@prefix ex: <http://example.org/> .
+
+ex:MyCell a ex:Cell ;
+    rdfs:label "My Cell" ;
+    onto:hasIdentity ex:MyCell_Identity .
+
+ex:MyCell_Identity a onto:Identity ;
+    onto:identityValue "my-cell-001" .
+```
+
+Invalid concept (missing required identity):
+```turtle  
+@prefix ex: <http://example.org/> .
+
+ex:MyCell a ex:Cell ;
+    rdfs:label "My Cell" .
+```
+
+**Quick Examples:**
+- Click "Valid Example" for a properly structured concept
+- Click "Invalid Example" to see validation failures
+- Click "Containment Example" for relationship patterns
+
+## Project Structure
+
+```
+src/
+├── app/
+│   ├── api/validate/           # Validation API endpoint
+│   ├── playground/             # Interactive validation UI
+│   └── page.tsx               # Home page
+├── lib/
+│   ├── ontology.ts            # Core ontology management
+│   └── validator.ts           # Validation engine  
+└── ontology/
+    ├── core.ttl               # Core ontology with universal rules
+    ├── shapes.ttl             # SHACL validation shapes
+    └── seed_concepts.ttl      # Sample concept instances
+```
+
+## API Reference
+
+### POST /api/validate
+
+Validates Turtle RDF content against OntoSeed SHACL shapes.
+
+**Request:**
+- Method: `POST`
+- Content-Type: `text/turtle`
+- Body: Turtle RDF content as plain text
+
+**Response:**
+```json
+{
+  "conforms": boolean,
+  "report": "string"
+}
+```
+
+**Example:**
+```bash
+curl -X POST http://localhost:3000/api/validate \
+  -H "Content-Type: text/turtle" \
+  -d "@my-concept.ttl"
+```
+
+## Development Workflow
+
+1. **New concepts** must extend the core ontology
+2. **Auto-validation** against SHACL shapes  
+3. **CI pipeline** validates ontology on every commit
+4. **Concepts must follow** at least the Identity rule
+
+## Validation Commands
+
+```bash
+# TypeScript linting
+npm run lint
+
+# Type checking and compilation  
+npm run build
+
+# Run tests (when available)
+npm test
+```
+
+## Sprint Planning
+
+- **Sprint 1**: ✅ Ontology seed + CI
+- **Sprint 2**: ✅ API wrapper + playground UI  
+- **Sprint 3**: Mini SemCom encoder/decoder PoC
+- **Sprint 4**: ZKP-backed provenance ledger
+
+## Mission
+
+Deliver verifiable, bandwidth-efficient, emotion-aware communication through:
+- Scale-independent ontology foundation
+- SHACL validation for concept verification
+- Future integration with Semantic Communication (6G SemCom)
+- Trust Ledger with Zero-Knowledge Proofs
+- Empathy Vectors via Codec Avatars
+- Distributed agent mesh architecture
+
+---
+
+🤖 Built with OntoSeed - Scale-independent knowledge representation
