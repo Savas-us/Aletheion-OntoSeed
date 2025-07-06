@@ -1,192 +1,192 @@
-name: OntoSeed Ontology Validation
+ name: OntoSeed Ontology Validation
 
-on:
-  push:
-    branches: [ main, develop ]
-    paths:
-      - 'src/ontology/**'
-      - 'src/lib/ontology.ts'
-  pull_request:
-    branches: [ main ]
-    paths:
-      - 'src/ontology/**'
-      - 'src/lib/ontology.ts'
+  on:
+    push:
+      branches: [ main, develop ]
+      paths:
+        - 'src/ontology/**'
+        - 'src/lib/ontology.ts'
+    pull_request:
+      branches: [ main ]
+      paths:
+        - 'src/ontology/**'
+        - 'src/lib/ontology.ts'
 
-jobs:
-  validate-ontology:
-    runs-on: ubuntu-latest
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+  jobs:
+    validate-ontology:
+      runs-on: ubuntu-latest
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '18'
-        cache: 'npm'
+      steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Install dependencies
-      run: npm ci
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
 
-    - name: Lint TypeScript
-      run: npm run lint
+      - name: Install dependencies
+        run: npm ci
 
-    - name: Type check
-      run: npm run build
+      - name: Lint TypeScript
+        run: npm run lint
 
-    - name: Install ontology validation tools
-      run: |
-        # Install Apache Jena for SHACL validation
-        wget https://archive.apache.org/dist/jena/binaries/apache-jena-4.10.0.tar.gz
-        tar -xzf apache-jena-4.10.0.tar.gz
-        export JENA_HOME=$PWD/apache-jena-4.10.0
-        export PATH=$JENA_HOME/bin:$PATH
-        
-        # Install pyshacl for additional validation
-        pip install pyshacl
+      - name: Build project
+        run: npm run build
 
-    - name: Validate core ontology syntax
-      run: |
-        export JENA_HOME=$PWD/apache-jena-4.10.0
-        export PATH=$JENA_HOME/bin:$PATH
-        
-        # Check TTL syntax
-        riot --validate src/ontology/core.ttl
-        riot --validate src/ontology/shapes.ttl
-        riot --validate src/ontology/seed_concepts.ttl
+      - name: Install ontology validation tools
+        run: |
+          # Install Apache Jena for SHACL validation
+          wget https://archive.apache.org/dist/jena/binaries/apache-jena-4.10.0.tar.gz
+          tar -xzf apache-jena-4.10.0.tar.gz
+          export JENA_HOME=$PWD/apache-jena-4.10.0
+          export PATH=$JENA_HOME/bin:$PATH
 
-    - name: Run SHACL validation
-      run: |
-        # Validate the seed concepts against the shapes
-        echo "Running SHACL validation..."
-        
-        # Run pyshacl with shapes and data graph
-        pyshacl -s src/ontology/shapes.ttl -d src/ontology/seed_concepts.ttl -f turtle -o validation-report.ttl
-        
-        # Check if there are any validation results to show
-        if [ -s validation-report.ttl ]; then
-          echo "Validation report:"
-          cat validation-report.ttl
-        else
-          echo "✓ SHACL validation passed - no issues found"
-        fi
+          # Install pyshacl for additional validation
+          pip install pyshacl
 
-    - name: Test ontology loading
-      run: |
-        # Create a simple test to ensure ontology loads correctly
-        cat > test-ontology-load.js << 'EOF'
-        const { initializeOntoSeed } = require('./dist/lib/ontology.js');
-        
-        async function testOntologyLoad() {
-          try {
-            console.log('Testing OntoSeed ontology loading...');
-            const ontology = await initializeOntoSeed();
-            
-            if (!ontology.isReady()) {
-              throw new Error('Ontology failed to load properly');
+      - name: Validate core ontology syntax
+        run: |
+          export JENA_HOME=$PWD/apache-jena-4.10.0
+          export PATH=$JENA_HOME/bin:$PATH
+
+          # Check TTL syntax
+          riot --validate src/ontology/core.ttl
+          riot --validate src/ontology/shapes.ttl
+          riot --validate src/ontology/seed_concepts.ttl
+
+      - name: Run SHACL validation
+        run: |
+          # Validate the seed concepts against the shapes
+          echo "Running SHACL validation..."
+
+          # Run pyshacl with shapes and data graph
+          pyshacl -s src/ontology/shapes.ttl -d src/ontology/seed_concepts.ttl -f turtle -o validation-report.ttl
+
+          # Check if there are any validation results to show
+          if [ -s validation-report.ttl ]; then
+            echo "Validation report:"
+            cat validation-report.ttl
+          else
+            echo "✓ SHACL validation passed - no issues found"
+          fi
+
+      - name: Test ontology loading
+        run: |
+          # Create a simple test to ensure ontology loads correctly
+          cat > test-ontology-load.js << 'EOF'
+          const { initializeOntoSeed } = require('./dist/lib/ontology.js');
+
+          async function testOntologyLoad() {
+            try {
+              console.log('Testing OntoSeed ontology loading...');
+              const ontology = await initializeOntoSeed();
+
+              if (!ontology.isReady()) {
+                throw new Error('Ontology failed to load properly');
+              }
+
+              const tripleCount = ontology.getTripleCount();
+              console.log(`✓ Ontology loaded successfully with ${tripleCount} triples`);
+
+              // Test adding a new entity
+              ontology.addEntity('http://example.org/TestEntity', 'Test Entity', 'A test entity for validation');
+
+              const compliantEntities = ontology.getCompliantEntities();
+              console.log(`✓ Found ${compliantEntities.length} compliant entities`);
+
+              // Test compliance report
+              const report = ontology.getComplianceReport('http://example.org/TestEntity');
+              console.log('✓ Compliance report generated:', report);
+
+              if (!report.identity) {
+                throw new Error('New entity does not have required identity');
+              }
+
+              console.log('✓ All ontology tests passed');
+            } catch (error) {
+              console.error('✗ Ontology test failed:', error);
+              process.exit(1);
             }
-            
-            const tripleCount = ontology.getTripleCount();
-            console.log(`✓ Ontology loaded successfully with ${tripleCount} triples`);
-            
-            // Test adding a new entity
-            ontology.addEntity('http://example.org/TestEntity', 'Test Entity', 'A test entity for validation');
-            
-            const compliantEntities = ontology.getCompliantEntities();
-            console.log(`✓ Found ${compliantEntities.length} compliant entities`);
-            
-            // Test compliance report
-            const report = ontology.getComplianceReport('http://example.org/TestEntity');
-            console.log('✓ Compliance report generated:', report);
-            
-            if (!report.identity) {
-              throw new Error('New entity does not have required identity');
-            }
-            
-            console.log('✓ All ontology tests passed');
-          } catch (error) {
-            console.error('✗ Ontology test failed:', error);
-            process.exit(1);
           }
-        }
-        
-        testOntologyLoad();
-        EOF
-        
-        node test-ontology-load.js
 
-    - name: Validate universal rules implementation
-      run: |
-        # Create a test to validate that the four universal rules are properly implemented
-        cat > test-universal-rules.js << 'EOF'
-        const { initializeOntoSeed } = require('./dist/lib/ontology.js');
-        
-        async function testUniversalRules() {
-          try {
-            console.log('Testing universal rules implementation...');
-            const ontology = await initializeOntoSeed();
-            
-            // Test Rule 1: Identity
-            ontology.addEntity('http://example.org/IdentityTest', 'Identity Test Entity');
-            if (!ontology.hasIdentity('http://example.org/IdentityTest')) {
-              throw new Error('Identity rule not properly implemented');
+          testOntologyLoad();
+          EOF
+
+          node test-ontology-load.js
+
+      - name: Validate universal rules implementation
+        run: |
+          # Create a test to validate that the four universal rules are properly implemented
+          cat > test-universal-rules.js << 'EOF'
+          const { initializeOntoSeed } = require('./dist/lib/ontology.js');
+
+          async function testUniversalRules() {
+            try {
+              console.log('Testing universal rules implementation...');
+              const ontology = await initializeOntoSeed();
+
+              // Test Rule 1: Identity
+              ontology.addEntity('http://example.org/IdentityTest', 'Identity Test Entity');
+              if (!ontology.hasIdentity('http://example.org/IdentityTest')) {
+                throw new Error('Identity rule not properly implemented');
+              }
+              console.log('✓ Rule 1 (Identity) verified');
+
+              // Test Rule 2: Containment - verify structure exists
+              const tripleCount = ontology.getTripleCount();
+              if (tripleCount === 0) {
+                throw new Error('Ontology contains no triples');
+              }
+              console.log('✓ Rule 2 (Containment) structure verified');
+
+              // Test Rule 3: Causality - verify structure exists
+              console.log('✓ Rule 3 (Causality) structure verified');
+
+              // Test Rule 4: Reflection - verify structure exists
+              console.log('✓ Rule 4 (Reflection) structure verified');
+
+              console.log('✓ All universal rules validated');
+            } catch (error) {
+              console.error('✗ Universal rules validation failed:', error);
+              process.exit(1);
             }
-            console.log('✓ Rule 1 (Identity) verified');
-            
-            // Test Rule 2: Containment - verify structure exists
-            const tripleCount = ontology.getTripleCount();
-            if (tripleCount === 0) {
-              throw new Error('Ontology contains no triples');
-            }
-            console.log('✓ Rule 2 (Containment) structure verified');
-            
-            // Test Rule 3: Causality - verify structure exists
-            console.log('✓ Rule 3 (Causality) structure verified');
-            
-            // Test Rule 4: Reflection - verify structure exists
-            console.log('✓ Rule 4 (Reflection) structure verified');
-            
-            console.log('✓ All universal rules validated');
-          } catch (error) {
-            console.error('✗ Universal rules validation failed:', error);
-            process.exit(1);
           }
-        }
-        
-        testUniversalRules();
-        EOF
-        
-        node test-universal-rules.js
 
-    - name: Generate validation report
-      run: |
-        echo "# OntoSeed Validation Report" > validation-summary.md
-        echo "Generated on: $(date)" >> validation-summary.md
-        echo "" >> validation-summary.md
-        echo "## Ontology Statistics" >> validation-summary.md
-        
-        # Count classes, properties, etc.
-        export JENA_HOME=$PWD/apache-jena-4.10.0
-        export PATH=$JENA_HOME/bin:$PATH
-        
-        echo "- Core ontology triples: $(riot --count src/ontology/core.ttl)" >> validation-summary.md
-        echo "- SHACL shapes triples: $(riot --count src/ontology/shapes.ttl)" >> validation-summary.md
-        echo "- Seed concepts triples: $(riot --count src/ontology/seed_concepts.ttl)" >> validation-summary.md
-        echo "" >> validation-summary.md
-        echo "## Validation Results" >> validation-summary.md
-        echo "- ✓ Syntax validation passed" >> validation-summary.md
-        echo "- ✓ SHACL validation passed" >> validation-summary.md
-        echo "- ✓ TypeScript compilation passed" >> validation-summary.md
-        echo "- ✓ Universal rules implementation verified" >> validation-summary.md
-        
-        cat validation-summary.md
+          testUniversalRules();
+          EOF
 
-    - name: Upload validation artifacts
-      uses: actions/upload-artifact@v4
-      if: always()
-      with:
-        name: ontology-validation-results
-        path: |
-          validation-summary.md
-          validation-report.ttl
+          node test-universal-rules.js
+
+      - name: Generate validation report
+        run: |
+          echo "# OntoSeed Validation Report" > validation-summary.md
+          echo "Generated on: $(date)" >> validation-summary.md
+          echo "" >> validation-summary.md
+          echo "## Ontology Statistics" >> validation-summary.md
+
+          # Count classes, properties, etc.
+          export JENA_HOME=$PWD/apache-jena-4.10.0
+          export PATH=$JENA_HOME/bin:$PATH
+
+          echo "- Core ontology triples: $(riot --count src/ontology/core.ttl)" >> validation-summary.md
+          echo "- SHACL shapes triples: $(riot --count src/ontology/shapes.ttl)" >> validation-summary.md
+          echo "- Seed concepts triples: $(riot --count src/ontology/seed_concepts.ttl)" >> validation-summary.md
+          echo "" >> validation-summary.md
+          echo "## Validation Results" >> validation-summary.md
+          echo "- ✓ Syntax validation passed" >> validation-summary.md
+          echo "- ✓ SHACL validation passed" >> validation-summary.md
+          echo "- ✓ TypeScript compilation passed" >> validation-summary.md
+          echo "- ✓ Universal rules implementation verified" >> validation-summary.md
+
+          cat validation-summary.md
+
+      - name: Upload validation artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ontology-validation-results
+          path: |
+            validation-summary.md
+            validation-report.ttl
