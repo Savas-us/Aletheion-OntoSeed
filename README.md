@@ -16,6 +16,9 @@ Build a scale-independent "seed ontology" with four universal rules: identity, c
 # Install dependencies
 npm install
 
+# Install pyshacl for validation (required)
+pip install pyshacl
+
 # Start development server
 npm run dev
 
@@ -25,6 +28,8 @@ npm run build
 # Run linting
 npm run lint
 ```
+
+**Note**: Requires `pyshacl` in PATH (`pip install pyshacl` or use a virtual environment).
 
 ## Four Universal Rules
 

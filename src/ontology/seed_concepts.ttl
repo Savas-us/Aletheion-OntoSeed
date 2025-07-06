@@ -173,6 +173,7 @@ ex:Dept1_Identity a onto:Identity ;
 ex:Company1 onto:contains ex:Dept1 .
 ex:Dept1 onto:containedBy ex:Company1 .
 ex:Dept1 onto:contains ex:Human1 .
+ex:Human1 onto:containedBy ex:Dept1 .
 
 # Additional human for more complex relationships
 ex:Human2 a ex:Human ;
