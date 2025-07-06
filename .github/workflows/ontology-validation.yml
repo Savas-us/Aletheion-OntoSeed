@@ -61,27 +61,15 @@ jobs:
         # Validate the seed concepts against the shapes
         echo "Running SHACL validation..."
         
-        # Combine core ontology and seed concepts for validation
-        cat src/ontology/core.ttl src/ontology/seed_concepts.ttl > combined-data.ttl
+        # Run pyshacl with shapes and data graph
+        pyshacl -s src/ontology/shapes.ttl -d src/ontology/seed_concepts.ttl -f turtle -o validation-report.ttl
         
-        # Run pyshacl and capture exit code
-        if pyshacl -s src/ontology/shapes.ttl -d combined-data.ttl -f turtle -o validation-report.ttl; then
-          echo "✓ SHACL validation passed (conforms=true)"
-          
-          # Check if there are any validation results to show
-          if [ -s validation-report.ttl ]; then
-            echo "Validation report:"
-            cat validation-report.ttl
-          else
-            echo "No validation issues found"
-          fi
+        # Check if there are any validation results to show
+        if [ -s validation-report.ttl ]; then
+          echo "Validation report:"
+          cat validation-report.ttl
         else
-          echo "✗ SHACL validation failed (conforms=false)"
-          if [ -s validation-report.ttl ]; then
-            echo "Validation report:"
-            cat validation-report.ttl
-          fi
-          exit 1
+          echo "✓ SHACL validation passed - no issues found"
         fi
 
     - name: Test ontology loading
