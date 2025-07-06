@@ -1,5 +1,6 @@
 name: OntoSeed Ontology Validation
-  on:
+
+on:
     push:
       branches: [ main, develop ]
       paths:
@@ -11,7 +12,7 @@ name: OntoSeed Ontology Validation
         - 'src/ontology/**'
         - 'src/lib/ontology.ts'
 
-  jobs:
+    jobs:
     validate-ontology:
       runs-on: ubuntu-latest
 
