@@ -12,7 +12,7 @@ on:
         - 'src/ontology/**'
         - 'src/lib/ontology.ts'
 
-    jobs:
+jobs:
     validate-ontology:
       runs-on: ubuntu-latest
 
