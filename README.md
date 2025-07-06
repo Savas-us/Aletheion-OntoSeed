@@ -40,19 +40,38 @@ npm run lint
 
 ## Playground
 
-### Getting Started
+### SHACL Validation Playground
 
 1. Start the development server:
    ```bash
    npm run dev
    ```
 
-2. Visit the playground:
+2. Visit the SHACL playground:
    ```
    http://localhost:3000/playground
    ```
 
 3. Try validating concepts against OntoSeed rules!
+
+### SemCom Playground
+
+Experience bandwidth-efficient semantic communication:
+
+1. Visit the SemCom playground:
+   ```
+   http://localhost:3000/semcom
+   ```
+
+2. **Encode**: Convert Turtle RDF into compressed Semantic Communication packages
+3. **Decode**: Restore original semantic content from compressed packages
+4. **Analyze**: View compression statistics and bandwidth savings
+
+**Features:**
+- Real-time compression ratio calculation
+- Round-trip validation (encode → decode → original)
+- Interactive UI with live examples
+- Bandwidth optimization for 6G SemCom applications
 
 ### Using the Playground
 
