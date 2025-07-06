@@ -1,16 +1,16 @@
 name: OntoSeed Ontology Validation
 
 on:
-    push:
-      branches: [ main, develop ]
-      paths:
-        - 'src/ontology/**'
-        - 'src/lib/ontology.ts'
-    pull_request:
-      branches: [ main ]
-      paths:
-        - 'src/ontology/**'
-        - 'src/lib/ontology.ts'
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'src/ontology/**'
+      - 'src/lib/ontology.ts'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'src/ontology/**'
+      - 'src/lib/ontology.ts'
 
 jobs:
     validate-ontology:
