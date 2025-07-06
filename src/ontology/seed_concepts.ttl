@@ -111,7 +111,11 @@ ex:Company1 onto:causedBy ex:Human1 .
 # Causal chain for provenance
 ex:CellDivisionChain a onto:CausalChain ;
     rdfs:label "Cell Division Chain" ;
-    rdfs:comment "Causal chain showing cell division process" .
+    rdfs:comment "Causal chain showing cell division process" ;
+    onto:hasIdentity ex:CellDivisionChain_Identity .
+
+ex:CellDivisionChain_Identity a onto:Identity ;
+    onto:identityValue "causal-chain-001-cell-division" .
 
 ex:Cell2 onto:hasProvenance ex:CellDivisionChain .
 
@@ -123,11 +127,19 @@ ex:Cell2 onto:hasProvenance ex:CellDivisionChain .
 # Create reflection entities
 ex:Cell1_Reflection a onto:Reflection ;
     rdfs:label "Cell1 Reflection" ;
-    rdfs:comment "Reflection of Cell1" .
+    rdfs:comment "Reflection of Cell1" ;
+    onto:hasIdentity ex:Cell1_Reflection_Identity .
+
+ex:Cell1_Reflection_Identity a onto:Identity ;
+    onto:identityValue "reflection-001-cell1-mirror" .
 
 ex:Human1_Mirror a onto:Mirror ;
     rdfs:label "Human1 Mirror" ;
-    rdfs:comment "Mirror entity for Human1" .
+    rdfs:comment "Mirror entity for Human1" ;
+    onto:hasIdentity ex:Human1_Mirror_Identity .
+
+ex:Human1_Mirror_Identity a onto:Identity ;
+    onto:identityValue "mirror-001-human1-reflection" .
 
 # Reflection relationships
 ex:Cell1 onto:reflects ex:Cell1_Reflection .
