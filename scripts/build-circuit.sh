@@ -28,8 +28,11 @@ fi
 if [ -f "build/prov_hash.wasm" ]; then
   echo "Circuit already compiled (build/prov_hash.wasm exists) – skipping…"
 else
-  echo "Compiling circuit..."
-  $CIRCOM circuits/prov_hash.circom --r1cs --wasm --sym -o build/
+  echo "Compiling circuit…"
+  $CIRCOM circuits/prov_hash.circom \
+         --r1cs --wasm --sym \
+         -l node_modules \
+         -o build/
 fi
 
 # Download powers of tau (small ceremony for development)
