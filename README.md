@@ -1,5 +1,5 @@
-![CI](https://github.com/Savas-us/Aletheion-OntoSeed/actions/workflows/ontology-validation.yml/badge.svg)
-![Deploy](https://github.com/Savas-us/Aletheion-OntoSeed/actions/workflows/ci-deploy.yml/badge.svg)
+<br>![CI](https://github.com/Savas-us/Aletheion-OntoSeed/actions/workflows/ontology-validation.yml/badge.svg)<br>
+<br>![Deploy](https://github.com/Savas-us/Aletheion-OntoSeed/actions/workflows/ci-deploy.yml/badge.svg)<br>
 
 # OntoSeed
 
