@@ -11,6 +11,18 @@ interface ProvenanceEvent {
   hash: string;
 }
 
+interface ProvenanceRecord {
+  id: number;
+  hash: string;
+  proof: unknown;
+  publicSignals: string[];
+}
+
+interface VerificationResult {
+  valid?: boolean;
+  error?: string;
+}
+
 export default function ProvenancePage() {
   const [recordSubj, setRecordSubj] = useState('');
   const [recordObj, setRecordObj] = useState('');
@@ -18,8 +30,8 @@ export default function ProvenancePage() {
   const [verifyProof, setVerifyProof] = useState('');
   const [verifyPublicSignals, setVerifyPublicSignals] = useState('');
   const [chainUri, setChainUri] = useState('');
-  const [recordResult, setRecordResult] = useState<any>(null);
-  const [verifyResult, setVerifyResult] = useState<any>(null);
+  const [recordResult, setRecordResult] = useState<ProvenanceRecord | { error: string } | null>(null);
+  const [verifyResult, setVerifyResult] = useState<VerificationResult | null>(null);
   const [chainResult, setChainResult] = useState<ProvenanceEvent[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -49,8 +61,8 @@ export default function ProvenancePage() {
       } else {
         setRecordResult({ error: data.error });
       }
-    } catch (error) {
-      setRecordResult({ error: String(error) });
+    } catch (_error) {
+      setRecordResult({ error: String(_error) });
     } finally {
       setLoading(false);
     }
@@ -75,8 +87,8 @@ export default function ProvenancePage() {
       
       const data = await response.json();
       setVerifyResult(data);
-    } catch (error) {
-      setVerifyResult({ error: String(error) });
+    } catch (_error) {
+      setVerifyResult({ error: String(_error) });
     } finally {
       setLoading(false);
     }
@@ -103,7 +115,7 @@ export default function ProvenancePage() {
       } else {
         setChainResult([]);
       }
-    } catch (error) {
+    } catch (_error) {
       setChainResult([]);
     } finally {
       setLoading(false);

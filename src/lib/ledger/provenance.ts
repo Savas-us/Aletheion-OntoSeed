@@ -2,7 +2,7 @@ import sqlite3 from 'sqlite3';
 import { createHash } from 'crypto';
 import { join } from 'path';
 import { existsSync, mkdirSync } from 'fs';
-const snarkjs = require('snarkjs');
+import * as snarkjs from 'snarkjs';
 
 export interface ProvenanceEvent {
   id: number;
@@ -13,10 +13,16 @@ export interface ProvenanceEvent {
   hash: string;
 }
 
+export interface SnarkProof {
+  a: unknown[];
+  b: unknown[][];
+  c: unknown[];
+}
+
 export interface ProvenanceRecord {
   id: number;
   hash: string;
-  proof: any;
+  proof: SnarkProof;
   publicSignals: string[];
 }
 
@@ -115,7 +121,7 @@ export class ProvenanceLedger {
       this.db!.all(
         'SELECT * FROM provenance_events WHERE subject = ? ORDER BY timestamp ASC',
         [uri],
-        (err, rows: any[]) => {
+        (err, rows: unknown[]) => {
           if (err) {
             reject(err);
           } else {
@@ -126,7 +132,7 @@ export class ProvenanceLedger {
     });
   }
 
-  async verifyProof(hash: string, proof: any, publicSignals: string[]): Promise<boolean> {
+  async verifyProof(hash: string, proof: SnarkProof, publicSignals: string[]): Promise<boolean> {
     try {
       // Load verification key
       const vkPath = join(process.cwd(), 'build', 'prov_hash.vkey.json');
@@ -134,19 +140,19 @@ export class ProvenanceLedger {
         throw new Error('Verification key not found. Run npm run build:circom first.');
       }
 
-      const vKey = require(vkPath);
+      const vKey = await import(vkPath);
       const result = await snarkjs.groth16.verify(vKey, publicSignals, proof);
       
       // Also verify the hash matches the public signal
       const expectedHash = publicSignals[0];
       return result && hash === expectedHash;
-    } catch (error) {
-      console.error('Proof verification failed:', error);
+    } catch (_error) {
+      console.error('Proof verification failed:', _error);
       return false;
     }
   }
 
-  private async generateProof(subj: string, obj: string, timestamp: number): Promise<{proof: any, publicSignals: string[]}> {
+  private async generateProof(subj: string, obj: string, timestamp: number): Promise<{proof: SnarkProof, publicSignals: string[]}> {
     try {
       // Convert inputs to circuit format
       const hashInput = `${subj}||${obj}||${timestamp}`;
@@ -173,8 +179,8 @@ export class ProvenanceLedger {
       const { proof, publicSignals } = await snarkjs.groth16.fullProve(input, wasmPath, zkeyPath);
       
       return { proof, publicSignals };
-    } catch (error) {
-      console.error('Proof generation failed:', error);
+    } catch (_error) {
+      console.error('Proof generation failed:', _error);
       // Return mock proof for development
       return {
         proof: { a: [], b: [], c: [] },
