@@ -11,9 +11,8 @@ mkdir -p build
 if command -v circom &> /dev/null; then
   CIRCOM="circom"
 else
-  # use latest published version (2.0.2 currently) via npx
-  echo "circom not found – downloading via npx…"
-  CIRCOM="npx --yes circom@2"
+  echo "circom not found – installing v2.0.4 via npx…"
+  CIRCOM="npx --yes circom@2.0.4"
 fi
 
 # Compile circuit (skip if already built)
