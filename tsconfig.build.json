@@ -9,5 +9,5 @@
     "declaration": false,
     "emitDeclarationOnly": false
   },
-  "include": ["src/lib/**/*"]
+  "include": ["src/lib/**/*", "src/types/**/*.d.ts"]
 }
