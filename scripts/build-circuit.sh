@@ -37,10 +37,12 @@ fi
 
 # Download powers of tau (small ceremony for development)
 PTAU_FILE="build/powersOfTau28_hez_final_16.ptau"
-if [ ! -f "$PTAU_FILE" ]; then
-    echo "Downloading powers of tau..."
-    curl -L https://hermez.s3-eu-west-1.amazonaws.com/powersOfTau28_hez_final_16.ptau -o "$PTAU_FILE"
+if [ -f "$PTAU_FILE" ]; then
+  echo "Removing old ptau file…"
+  rm -f "$PTAU_FILE"
 fi
+echo "Downloading powers of tau..."
+curl -L https://hermez.s3-eu-west-1.amazonaws.com/powersOfTau28_hez_final_16.ptau -o "$PTAU_FILE"
 
 # Generate proving key
 echo "Generating proving key..."
