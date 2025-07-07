@@ -7,12 +7,21 @@ echo "Building ZKP circuit for provenance..."
 # Create build directory
 mkdir -p build
 
-# Ensure circom binary ──────────────────────────────────────────
+# Ensure circom binary ─────────────────────────────────────────────
 if command -v circom &> /dev/null; then
   CIRCOM="circom"
 else
-  echo "circom not found – installing v2.0.4 via npx…"
-  CIRCOM="npx --yes circom@2.0.4"
+  if [ -f "build/circom" ]; then
+    echo "Using cached circom binary"
+    CIRCOM="./build/circom"
+  else
+    VERSION="2.1.5"
+    echo "circom not found – downloading binary v$VERSION …"
+    URL="https://github.com/iden3/circom/releases/download/v${VERSION}/circom-linux-amd64"
+    curl -L "$URL" -o build/circom
+    chmod +x build/circom
+    CIRCOM="./build/circom"
+  fi
 fi
 
 # Compile circuit (skip if already built)
