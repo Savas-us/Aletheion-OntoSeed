@@ -1,3 +1,6 @@
+![CI](https://github.com/Savas-us/Aletheion-OntoSeed/actions/workflows/ontology-validation.yml/badge.svg)
+![Deploy](https://github.com/Savas-us/Aletheion-OntoSeed/actions/workflows/ci-deploy.yml/badge.svg)
+
 # OntoSeed
 
 Build a scale-independent "seed ontology" with four universal rules: identity, containment, cause, reflection. Provide SHACL validation so every new concept is auto-checked.
