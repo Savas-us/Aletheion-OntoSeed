@@ -7,16 +7,20 @@ echo "Building ZKP circuit for provenance..."
 # Create build directory
 mkdir -p build
 
-# Check if circom is installed
-if ! command -v circom &> /dev/null; then
-    echo "Error: circom not found. Please install circom:"
-    echo "npm install -g circom"
-    exit 1
+# Check if circom is installed and set up command
+if command -v circom &> /dev/null; then
+    CIRCOM="circom"
+    echo "Using system circom"
+else
+    echo "circom not found in PATH, installing locally..."
+    npm install --no-save --silent circom-cli@2
+    CIRCOM="npx --yes circom"
+    echo "Using local circom"
 fi
 
 # Compile circuit
 echo "Compiling circuit..."
-circom circuits/prov_hash.circom --r1cs --wasm --sym -o build/
+$CIRCOM circuits/prov_hash.circom --r1cs --wasm --sym -o build/
 
 # Download powers of tau (small ceremony for development)
 PTAU_FILE="build/powersOfTau28_hez_final_16.ptau"
