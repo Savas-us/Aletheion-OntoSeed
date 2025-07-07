@@ -7,17 +7,22 @@ echo "Building ZKP circuit for provenance..."
 # Create build directory
 mkdir -p build
 
-# Ensure circom is available ────────────────────────────────
+# Ensure circom binary ──────────────────────────────────────────
 if command -v circom &> /dev/null; then
   CIRCOM="circom"
 else
-  echo "circom not found – using npx fallback…"
-  CIRCOM="npx --yes circom@2.1.6"
+  # use latest published version (2.0.2 currently) via npx
+  echo "circom not found – downloading via npx…"
+  CIRCOM="npx --yes circom@latest"
 fi
 
-# Compile circuit
-echo "Compiling circuit..."
-$CIRCOM circuits/prov_hash.circom --r1cs --wasm --sym -o build/
+# Compile circuit (skip if already built)
+if [ -f "build/prov_hash.wasm" ]; then
+  echo "Circuit already compiled (build/prov_hash.wasm exists) – skipping…"
+else
+  echo "Compiling circuit..."
+  $CIRCOM circuits/prov_hash.circom --r1cs --wasm --sym -o build/
+fi
 
 # Download powers of tau (small ceremony for development)
 PTAU_FILE="build/powersOfTau28_hez_final_16.ptau"
