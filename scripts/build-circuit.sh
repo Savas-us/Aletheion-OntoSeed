@@ -35,18 +35,24 @@ else
          -o build/
 fi
 
-# Download powers of tau (small ceremony for development)
-PTAU_FILE="build/powersOfTau28_hez_final_16.ptau"
-if [ -f "$PTAU_FILE" ]; then
-  echo "Removing old ptau file…"
-  rm -f "$PTAU_FILE"
-fi
-echo "Downloading powers of tau..."
-curl -L https://hermez.s3-eu-west-1.amazonaws.com/powersOfTau28_hez_final_16.ptau -o "$PTAU_FILE"
+# -----------------------------------------------------------------
+#  PTAU generation (local, fast)
+# -----------------------------------------------------------------
+PTAU_SMALL="build/pot14_0000.ptau"
+PTAU_FINAL="build/pot14_final.ptau"
+
+# clean old ptau
+rm -f build/*.ptau
+
+echo "Generating new small PTAU (power 14)…"
+npx --yes snarkjs powersoftau new bn128 14 "$PTAU_SMALL" -v -s "CI$(date +%s)"
+npx --yes snarkjs powersoftau contribute "$PTAU_SMALL" "$PTAU_FINAL" \
+     --name="CI contribution" -v -e="random text"
+echo "PTAU generation done."
 
 # Generate proving key
 echo "Generating proving key..."
-snarkjs groth16 setup build/prov_hash.r1cs "$PTAU_FILE" build/prov_hash.zkey
+snarkjs groth16 setup build/prov_hash.r1cs "$PTAU_FINAL" build/prov_hash.zkey
 
 # Export verification key
 echo "Exporting verification key..."
