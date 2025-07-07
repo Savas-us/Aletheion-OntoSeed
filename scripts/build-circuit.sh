@@ -38,14 +38,15 @@ fi
 # -----------------------------------------------------------------
 #  PTAU generation (local, fast)
 # -----------------------------------------------------------------
-PTAU_SMALL="build/pot14_0000.ptau"
-PTAU_FINAL="build/pot14_final.ptau"
+POW=16
+PTAU_SMALL="build/pot${POW}_0000.ptau"
+PTAU_FINAL="build/pot${POW}_final.ptau"
 
 # clean old ptau
 rm -f build/*.ptau
 
-echo "Generating new small PTAU (power 14)…"
-npx --yes snarkjs powersoftau new bn128 14 "$PTAU_SMALL" -v
+echo "Generating new PTAU (power $POW)…"
+npx --yes snarkjs powersoftau new bn128 $POW "$PTAU_SMALL" -v
 npx --yes snarkjs powersoftau contribute "$PTAU_SMALL" "$PTAU_FINAL" \
      --name="CI contribution" -v -e="random text"
 echo "PTAU generation done."
