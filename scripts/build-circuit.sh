@@ -45,7 +45,7 @@ PTAU_FINAL="build/pot14_final.ptau"
 rm -f build/*.ptau
 
 echo "Generating new small PTAU (power 14)…"
-npx --yes snarkjs powersoftau new bn128 14 "$PTAU_SMALL" -v -s "CI$(date +%s)"
+npx --yes snarkjs powersoftau new bn128 14 "$PTAU_SMALL" -v
 npx --yes snarkjs powersoftau contribute "$PTAU_SMALL" "$PTAU_FINAL" \
      --name="CI contribution" -v -e="random text"
 echo "PTAU generation done."
