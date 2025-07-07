@@ -115,7 +115,7 @@ export default function ProvenancePage() {
       } else {
         setChainResult([]);
       }
-    } catch (_error) {
+    } catch {
       setChainResult([]);
     } finally {
       setLoading(false);
