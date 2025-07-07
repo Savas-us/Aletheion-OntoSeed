@@ -7,15 +7,12 @@ echo "Building ZKP circuit for provenance..."
 # Create build directory
 mkdir -p build
 
-# Check if circom is installed and set up command
+# Ensure circom is available ────────────────────────────────
 if command -v circom &> /dev/null; then
-    CIRCOM="circom"
-    echo "Using system circom"
+  CIRCOM="circom"
 else
-    echo "circom not found in PATH, installing locally..."
-    npm install --no-save --silent circom-cli@2
-    CIRCOM="npx --yes circom"
-    echo "Using local circom"
+  echo "circom not found – using npx fallback…"
+  CIRCOM="npx --yes circom@2.1.6"
 fi
 
 # Compile circuit
