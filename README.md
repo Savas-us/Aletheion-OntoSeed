@@ -160,6 +160,11 @@ curl -X POST http://localhost:3000/api/validate \
 3. **CI pipeline** validates ontology on every commit
 4. **Concepts must follow** at least the Identity rule
 
+### CI Pipeline
+
+The workflow now caches npm dependencies and PTAU/circom artefacts.
+First run ≈ 20 min → subsequent runs ≈ 7-8 min.
+
 ## Validation Commands
 
 ```bash
@@ -173,12 +178,72 @@ npm run build
 npm test
 ```
 
+## Deployment
+
+### Local Development
+
+```bash
+# Install dependencies
+npm install
+
+# Install pyshacl for validation
+pip install pyshacl
+
+# Start development server
+npm run dev
+```
+
+### Docker Deployment
+
+```bash
+# Build and run with Docker
+docker build -t ontoseed .
+docker run -p 3000:3000 ontoseed
+
+# Or use docker-compose
+docker-compose up
+```
+
+### Cloud Deployment (Fly.io)
+
+```bash
+# Install Fly CLI
+curl -L https://fly.io/install.sh | sh
+
+# Deploy to Fly.io
+fly deploy
+```
+
+### Health Checks
+
+```bash
+# Run smoke tests
+./scripts/smoke.sh
+
+# Test specific endpoint
+./scripts/smoke.sh https://your-app.fly.dev
+```
+
+### CI/CD Pipeline
+
+The project includes automated deployment via GitHub Actions:
+
+1. **Build**: Creates Docker image and pushes to GitHub Container Registry
+2. **Test**: Runs smoke tests against the built image
+3. **Deploy**: Deploys to Fly.io on main branch pushes
+4. **Summary**: Reports deployment URL and endpoints
+
+Required secrets:
+- `FLY_API_TOKEN`: Fly.io deployment token
+
 ## Sprint Planning
 
 - **Sprint 1**: ✅ Ontology seed + CI
 - **Sprint 2**: ✅ API wrapper + playground UI  
-- **Sprint 3**: Mini SemCom encoder/decoder PoC
-- **Sprint 4**: ZKP-backed provenance ledger
+- **Sprint 3**: ✅ Mini SemCom encoder/decoder PoC
+- **Sprint 4**: ✅ ZKP-backed provenance ledger
+- **Sprint 5**: ✅ CI Speed-up with caching
+- **Sprint 6**: ✅ Deployment & Demo Readiness
 
 ## Mission
 

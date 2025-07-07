@@ -1,0 +1,97 @@
+name: CI/CD Deploy
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+      
+    - name: Log in to Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: Extract metadata
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+        tags: |
+          type=ref,event=branch
+          type=ref,event=pr
+          type=sha,prefix=sha-
+          
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        
+    - name: Run smoke tests
+      run: |
+        # Test Docker image locally
+        docker run --rm -d --name ontoseed-test -p 3001:3000 ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:sha-${{ github.sha }}
+        sleep 15
+        
+        # Health check
+        curl -f http://localhost:3001/api/validate || exit 1
+        
+        # Cleanup
+        docker stop ontoseed-test
+        
+    outputs:
+      image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:sha-${{ github.sha }}
+      
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Setup Fly CLI
+      uses: superfly/flyctl-actions/setup-flyctl@master
+      
+    - name: Deploy to Fly.io
+      run: |
+        flyctl deploy --remote-only --image ${{ needs.build.outputs.image }}
+      env:
+        FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+        
+    - name: Get deployment URL
+      id: deploy-url
+      run: |
+        APP_URL=$(flyctl info --json | jq -r '.Hostname')
+        echo "url=https://$APP_URL" >> $GITHUB_OUTPUT
+        
+    - name: Add deployment summary
+      run: |
+        echo "## 🚀 Deployment Summary" >> $GITHUB_STEP_SUMMARY
+        echo "- **Image**: \`${{ needs.build.outputs.image }}\`" >> $GITHUB_STEP_SUMMARY
+        echo "- **Preview URL**: ${{ steps.deploy-url.outputs.url }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **SHACL Playground**: ${{ steps.deploy-url.outputs.url }}/playground" >> $GITHUB_STEP_SUMMARY
+        echo "- **SemCom Playground**: ${{ steps.deploy-url.outputs.url }}/semcom" >> $GITHUB_STEP_SUMMARY
+        echo "- **Provenance Ledger**: ${{ steps.deploy-url.outputs.url }}/provenance" >> $GITHUB_STEP_SUMMARY

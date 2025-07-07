@@ -1,0 +1,53 @@
+{
+  "name": "OntoSeed Development Environment",
+  "dockerFile": "../Dockerfile",
+  "context": "..",
+  "target": "builder",
+  "workspaceFolder": "/app",
+  "forwardPorts": [3000],
+  "portsAttributes": {
+    "3000": {
+      "label": "OntoSeed App",
+      "onAutoForward": "notify"
+    }
+  },
+  "remoteUser": "node",
+  "overrideCommand": false,
+  "postCreateCommand": "npm install",
+  "postStartCommand": "npm run dev",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-vscode.vscode-typescript-next",
+        "bradlc.vscode-tailwindcss",
+        "esbenp.prettier-vscode",
+        "ms-vscode.vscode-eslint",
+        "ms-vscode.vscode-json"
+      ],
+      "settings": {
+        "typescript.preferences.importModuleSpecifier": "relative",
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "eslint.workingDirectories": ["./"],
+        "files.exclude": {
+          "**/node_modules": true,
+          "**/.next": true,
+          "**/build": true,
+          "**/dist": true
+        }
+      }
+    }
+  },
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "18"
+    },
+    "ghcr.io/devcontainers/features/python:1": {
+      "version": "3.11"
+    }
+  },
+  "mounts": [
+    "source=${localWorkspaceFolder}/data,target=/app/data,type=bind,consistency=cached"
+  ],
+  "shutdownAction": "stopContainer"
+}
