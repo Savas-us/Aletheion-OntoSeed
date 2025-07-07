@@ -39,16 +39,18 @@ fi
 #  PTAU generation (local, fast)
 # -----------------------------------------------------------------
 POW=16
-PTAU_SMALL="build/pot${POW}_0000.ptau"
+PTAU_NEW="build/pot${POW}_0000.ptau"
+PTAU_CONTRIB="build/pot${POW}_contrib.ptau"
 PTAU_FINAL="build/pot${POW}_final.ptau"
 
 # clean old ptau
 rm -f build/*.ptau
 
 echo "Generating new PTAU (power $POW)…"
-npx --yes snarkjs powersoftau new bn128 $POW "$PTAU_SMALL" -v
-npx --yes snarkjs powersoftau contribute "$PTAU_SMALL" "$PTAU_FINAL" \
+npx --yes snarkjs powersoftau new bn128 $POW "$PTAU_NEW" -v
+npx --yes snarkjs powersoftau contribute "$PTAU_NEW" "$PTAU_CONTRIB" \
      --name="CI contribution" -v -e="random text"
+npx --yes snarkjs powersoftau prepare phase2 "$PTAU_CONTRIB" "$PTAU_FINAL" -v
 echo "PTAU generation done."
 
 # Generate proving key
