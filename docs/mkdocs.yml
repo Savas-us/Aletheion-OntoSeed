@@ -1,0 +1,60 @@
+site_name: OntoSeed Documentation
+site_description: Scale-independent ontology with ZKP provenance ledger
+site_author: OntoSeed Project
+site_url: https://savas-us.github.io/Aletheion-OntoSeed/
+
+repo_name: Savas-us/Aletheion-OntoSeed
+repo_url: https://github.com/Savas-us/Aletheion-OntoSeed
+
+theme:
+  name: material
+  palette:
+    # Palette toggle for light mode
+    - scheme: default
+      primary: indigo
+      accent: blue
+      toggle:
+        icon: material/brightness-7 
+        name: Switch to dark mode
+
+    # Palette toggle for dark mode
+    - scheme: slate
+      primary: indigo
+      accent: blue
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.highlight
+    - content.code.copy
+
+plugins:
+  - search
+  - mkdocstrings
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - attr_list
+  - md_in_html
+
+nav:
+  - Home: index.md
+  - Architecture: architecture.md
+  - API Reference: api.md
+  - Four Universal Rules: rules.md
+  - Playgrounds: playgrounds.md
+  - Deployment: deployment.md

@@ -5,12 +5,25 @@
 
 Build a scale-independent "seed ontology" with four universal rules: identity, containment, cause, reflection. Provide SHACL validation so every new concept is auto-checked.
 
+## System Architecture
+
+![OntoSeed Architecture](docs/architecture.png)
+
+OntoSeed is built as a layered architecture with four main components:
+
+1. **User Interface Layer**: Interactive playgrounds for SHACL validation, SemCom encoding, and ZKP provenance
+2. **API Layer**: RESTful endpoints for validation, semantic communication, and provenance operations
+3. **Core Engine**: Ontology management, validation processing, and zero-knowledge proof generation
+4. **Universal Rules Foundation**: Implementation of Identity, Containment, Cause, and Reflection principles
+
 ## Technology Stack
 
 - **Framework**: Next.js 15 with App Router
 - **Language**: TypeScript  
 - **Styling**: Tailwind CSS
 - **Ontology**: RDF/OWL with SHACL validation
+- **ZKP**: Circom + Groth16 + snarkjs
+- **Database**: SQLite
 - **Package Manager**: npm
 
 ## Quick Start
