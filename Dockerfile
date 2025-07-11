@@ -1,8 +1,32 @@
 # Multi-stage build for OntoSeed production deployment
+# Stage A: circom-builder - glibc-based for circom binary compatibility
+FROM node:18-bullseye-slim AS circom-builder
+
+# Install system dependencies for circom and snarkjs
+RUN apt-get update && apt-get install -y \
+    curl \
+    bash \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Copy package files and install only circom-related dependencies
+COPY package*.json ./
+RUN npm ci --only=production=false
+
+# Copy circuit files and build script
+COPY circuits/ ./circuits/
+COPY scripts/build-circuit.sh ./scripts/
+RUN chmod +x ./scripts/build-circuit.sh
+
+# Build circuits and generate keys (this is the heavy, cacheable step)
+RUN ./scripts/build-circuit.sh
+
+# Stage B: builder - Alpine for Next.js build
 FROM node:18-alpine AS builder
 
-# Install system dependencies for native modules and glibc compatibility
-RUN apk add --no-cache python3 make g++ curl bash gcompat
+# Install system dependencies for native modules
+RUN apk add --no-cache python3 make g++ curl bash
 
 WORKDIR /app
 
@@ -13,13 +37,16 @@ RUN npm ci --only=production=false
 # Copy source code and build configurations
 COPY . .
 
-# Build the application (includes build:lib & build:circom)
-RUN npm run build
+# Copy circuit artifacts from circom-builder
+COPY --from=circom-builder /app/build ./build
+
+# Build Next.js and TypeScript (skip circom build since we copied artifacts)
+RUN npm run build:next && npm run build:lib
 
 # Install production dependencies for runtime
 RUN npm ci --only=production && npm cache clean --force
 
-# Production stage
+# Stage C: runner - minimal Alpine runtime
 FROM node:18-alpine AS runner
 
 # Install runtime dependencies
