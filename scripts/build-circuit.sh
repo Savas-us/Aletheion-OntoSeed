@@ -60,11 +60,11 @@ fi
 
 # Generate proving key
 echo "Generating proving key..."
-snarkjs groth16 setup build/prov_hash.r1cs "$PTAU_FINAL" build/prov_hash.zkey
+npx --yes snarkjs groth16 setup build/prov_hash.r1cs "$PTAU_FINAL" build/prov_hash.zkey
 
 # Export verification key
 echo "Exporting verification key..."
-snarkjs zkey export verificationkey build/prov_hash.zkey build/prov_hash.vkey.json
+npx --yes snarkjs zkey export verificationkey build/prov_hash.zkey build/prov_hash.vkey.json
 
 # Copy wasm file to correct location
 cp build/prov_hash_js/prov_hash.wasm build/
