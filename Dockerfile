@@ -20,8 +20,8 @@ RUN npm run build
 FROM node:18-alpine AS runner
 
 # Install runtime dependencies
-RUN apk add --no-cache python3 py3-pip curl && \
-    pip3 install pyshacl
+RUN apk add --no-cache python3 py3-pip curl \
+    && PIP_BREAK_SYSTEM_PACKAGES=1 pip3 install --no-cache-dir pyshacl
 
 WORKDIR /app
 
