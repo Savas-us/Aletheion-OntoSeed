@@ -1,0 +1,43 @@
+name: Mark stale issues and pull requests
+
+on:
+  schedule:
+  - cron: '0 0 * * *' # Run daily at midnight
+
+permissions:
+  issues: write
+  pull-requests: write
+
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/stale@v9
+      with:
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
+        stale-issue-message: |
+          This issue has been automatically marked as stale because it has not had 
+          recent activity. It will be closed if no further activity occurs within 7 days.
+          
+          If you're still working on this or it's still relevant, please add a comment 
+          to keep it open. Thanks for your contributions to OntoSeed! 🌱
+        stale-pr-message: |
+          This pull request has been automatically marked as stale because it has not had 
+          recent activity. It will be closed if no further activity occurs within 7 days.
+          
+          If you're still working on this, please add a comment or push new commits 
+          to keep it open. Thanks for your contributions to OntoSeed! 🌱
+        close-issue-message: |
+          This issue was automatically closed because it has been stale for 7 days 
+          with no activity. If you need to reopen this issue, please create a new 
+          issue and reference this one.
+        close-pr-message: |
+          This pull request was automatically closed because it has been stale for 7 days 
+          with no activity. If you need to reopen this PR, please create a new one 
+          and reference this one.
+        days-before-stale: 60
+        days-before-close: 7
+        stale-issue-label: 'stale'
+        stale-pr-label: 'stale'
+        exempt-issue-labels: 'pinned,security,on-hold'
+        exempt-pr-labels: 'pinned,security,on-hold'

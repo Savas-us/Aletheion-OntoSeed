@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build && npm run build:lib && npm run build:circom",
+    "build:next": "next build",
     "build:circom": "bash scripts/build-circuit.sh",
     "build:lib": "tsc -p tsconfig.build.json",
     "start": "next start",
