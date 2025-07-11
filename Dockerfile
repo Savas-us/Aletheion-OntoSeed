@@ -16,6 +16,9 @@ COPY . .
 # Build the application (includes build:lib & build:circom)
 RUN npm run build
 
+# Install production dependencies for runtime
+RUN npm ci --only=production && npm cache clean --force
+
 # Production stage
 FROM node:18-alpine AS runner
 
@@ -29,19 +32,17 @@ WORKDIR /app
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nextjs
 
-# Copy built application
+# Copy built application and production dependencies
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/build ./build
 COPY --from=builder /app/src/ontology ./src/ontology
 COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/node_modules ./node_modules
 
 # Create data directory with proper permissions
 RUN mkdir -p ./data && chown nextjs:nodejs ./data
-
-# Install only production dependencies
-RUN npm ci --only=production && npm cache clean --force
 
 # Set environment variables
 ENV NODE_ENV=production
