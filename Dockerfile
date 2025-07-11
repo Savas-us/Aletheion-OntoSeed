@@ -1,8 +1,8 @@
 # Multi-stage build for OntoSeed production deployment
 FROM node:18-alpine AS builder
 
-# Install system dependencies for native modules
-RUN apk add --no-cache python3 make g++ curl bash
+# Install system dependencies for native modules and glibc compatibility
+RUN apk add --no-cache python3 make g++ curl bash gcompat
 
 WORKDIR /app
 
