@@ -7,6 +7,12 @@ echo "Building ZKP circuit for provenance..."
 # Create build directory
 mkdir -p build
 
+# Skip entire build if final artifacts already exist (idempotent for cache)
+if [ -f "build/prov_hash.zkey" ] && [ -f "build/prov_hash.vkey.json" ] && [ -f "build/prov_hash.wasm" ]; then
+  echo "Circuit already built (all artifacts exist) – skipping entire build..."
+  exit 0
+fi
+
 # Ensure circom binary ─────────────────────────────────────────────
 if command -v circom &> /dev/null; then
   CIRCOM="circom"

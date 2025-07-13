@@ -53,18 +53,21 @@ jobs:
         
     - name: Run smoke tests
       run: |
-        # Test Docker image locally
-        docker run --rm -d --name ontoseed-test -p 3001:3000 ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:sha-${{ github.sha }}
-        sleep 15
+        IMAGE=$(echo "${{ steps.meta.outputs.tags }}" | head -n1 | tr -d '[:space:]')
+        echo "Testing image: $IMAGE"
+        docker run --rm -d --name ontoseed-test -p 3001:3000 "$IMAGE"
+        sleep 20
         
-        # Health check
-        curl -f http://localhost:3001/api/validate || exit 1
+        # POST minimal Turtle payload to /api/validate
+        cat <<EOF | curl -f -X POST -H "Content-Type: text/turtle" --data-binary @- http://localhost:3001/api/validate || (docker logs ontoseed-test && exit 1)
+        @prefix ex: <http://example.org/> .
+        ex:test ex:hasProperty ex:value .
+        EOF
         
-        # Cleanup
         docker stop ontoseed-test
         
     outputs:
-      image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:sha-${{ github.sha }}
+      image: ${{ env.REGISTRY }}/savas-us/aletheion-ontoseed:sha-${{ github.sha }}
       
   deploy:
     needs: build
