@@ -58,11 +58,11 @@ jobs:
         docker run --rm -d --name ontoseed-test -p 3001:3000 "$IMAGE"
         sleep 20
         
-        # POST tiny Turtle payload to /api/validate
-        curl -f -X POST \
-          -H "Content-Type: text/turtle" \
-          -d "@prefix ex: <http://example.org/> . ex:test ex:hasProperty ex:value ." \
-          http://localhost:3001/api/validate || (docker logs ontoseed-test && exit 1)
+        # POST minimal Turtle payload to /api/validate
+        cat <<EOF | curl -f -X POST -H "Content-Type: text/turtle" --data-binary @- http://localhost:3001/api/validate || (docker logs ontoseed-test && exit 1)
+        @prefix ex: <http://example.org/> .
+        ex:test ex:hasProperty ex:value .
+        EOF
         
         docker stop ontoseed-test
         
