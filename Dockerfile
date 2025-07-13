@@ -1,6 +1,6 @@
 # Multi-stage build for OntoSeed production deployment
 # Stage A: circom-builder - glibc-based for circom binary compatibility
-FROM node:18-bullseye-slim AS circom-builder
+FROM node:18-bookworm-slim AS circom-builder
 
 # Install system dependencies for circom and snarkjs
 RUN apt-get update && apt-get install -y \
