@@ -40,6 +40,7 @@ COPY . .
 # Copy circuit artifacts from circom-builder
 COPY --from=circom-builder /app/build ./build
 
+
 # Build Next.js and TypeScript (skip circom build since we copied artifacts)
 RUN npm run build:next && npm run build:lib
 
