@@ -53,18 +53,22 @@ jobs:
         
     - name: Run smoke tests
       run: |
+        # Use first tag from build output (already lowercase)
+        IMAGE=$(echo "${{ steps.meta.outputs.tags }}" | cut -d',' -f1)
+        echo "Testing image: $IMAGE"
+        
         # Test Docker image locally
-        docker run --rm -d --name ontoseed-test -p 3001:3000 ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:sha-${{ github.sha }}
+        docker run --rm -d --name ontoseed-test -p 3001:3000 "$IMAGE"
         sleep 15
         
-        # Health check
-        curl -f http://localhost:3001/api/validate || exit 1
+        # Health check with error logging
+        curl -f http://localhost:3001/api/validate || (docker logs ontoseed-test && exit 1)
         
         # Cleanup
         docker stop ontoseed-test
         
     outputs:
-      image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:sha-${{ github.sha }}
+      image: ${{ env.REGISTRY }}/savas-us/aletheion-ontoseed:sha-${{ github.sha }}
       
   deploy:
     needs: build
