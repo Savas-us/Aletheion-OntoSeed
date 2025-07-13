@@ -53,18 +53,11 @@ jobs:
         
     - name: Run smoke tests
       run: |
-        # Use first tag from build output (already lowercase)
-        IMAGE=$(echo "${{ steps.meta.outputs.tags }}" | cut -d',' -f1)
+        IMAGE=$(echo "${{ steps.meta.outputs.tags }}" | head -n1 | tr -d '[:space:]')
         echo "Testing image: $IMAGE"
-        
-        # Test Docker image locally
         docker run --rm -d --name ontoseed-test -p 3001:3000 "$IMAGE"
         sleep 15
-        
-        # Health check with error logging
         curl -f http://localhost:3001/api/validate || (docker logs ontoseed-test && exit 1)
-        
-        # Cleanup
         docker stop ontoseed-test
         
     outputs:
