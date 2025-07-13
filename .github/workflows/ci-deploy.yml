@@ -56,8 +56,14 @@ jobs:
         IMAGE=$(echo "${{ steps.meta.outputs.tags }}" | head -n1 | tr -d '[:space:]')
         echo "Testing image: $IMAGE"
         docker run --rm -d --name ontoseed-test -p 3001:3000 "$IMAGE"
-        sleep 15
-        curl -f http://localhost:3001/api/validate || (docker logs ontoseed-test && exit 1)
+        sleep 20
+        
+        # POST tiny Turtle payload to /api/validate
+        curl -f -X POST \
+          -H "Content-Type: text/turtle" \
+          -d "@prefix ex: <http://example.org/> . ex:test ex:hasProperty ex:value ." \
+          http://localhost:3001/api/validate || (docker logs ontoseed-test && exit 1)
+        
         docker stop ontoseed-test
         
     outputs:
