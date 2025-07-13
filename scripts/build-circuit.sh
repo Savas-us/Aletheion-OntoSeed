@@ -7,6 +7,12 @@ echo "Building ZKP circuit for provenance..."
 # Create build directory
 mkdir -p build
 
+# Skip entire build if final artifacts already exist (idempotent for cache)
+if [ -f "build/prov_hash.zkey" ] && [ -f "build/prov_hash.vkey.json" ] && [ -f "build/prov_hash.wasm" ]; then
+  echo "Circuit already built (all artifacts exist) – skipping entire build..."
+  exit 0
+fi
+
 # Ensure circom binary ─────────────────────────────────────────────
 if command -v circom &> /dev/null; then
   CIRCOM="circom"
@@ -60,11 +66,11 @@ fi
 
 # Generate proving key
 echo "Generating proving key..."
-snarkjs groth16 setup build/prov_hash.r1cs "$PTAU_FINAL" build/prov_hash.zkey
+npx --yes snarkjs groth16 setup build/prov_hash.r1cs "$PTAU_FINAL" build/prov_hash.zkey
 
 # Export verification key
 echo "Exporting verification key..."
-snarkjs zkey export verificationkey build/prov_hash.zkey build/prov_hash.vkey.json
+npx --yes snarkjs zkey export verificationkey build/prov_hash.zkey build/prov_hash.vkey.json
 
 # Copy wasm file to correct location
 cp build/prov_hash_js/prov_hash.wasm build/
